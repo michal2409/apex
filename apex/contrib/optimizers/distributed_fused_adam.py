@@ -2421,12 +2421,6 @@ class DistributedFusedAdam(torch.optim.Optimizer):
                 assert grad_scaler._scale is not None
                 self._grad_scale /= grad_scaler._scale.view([])
             grad_norm = self.grad_norm()
-            if hasattr(self, "_step_supports_amp_scaling") and self._step_supports_amp_scaling:
-                # Gradient norm was computed before gradient unscaling.
-                grad_norm = grad_norm / grad_scaler._scale.view([])
-                clip_coef = self._max_norm / (grad_norm + 1e-6)
-                clip_coef_clamped = torch.clamp(clip_coef, max=1.0)
-                self._grad_scale *= clip_coef_clamped
 
             found_inf = torch.logical_not(torch.isfinite(grad_norm))
             scaler_state = grad_scaler._per_optimizer_states[id(self)]
